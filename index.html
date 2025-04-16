@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Circle of Fifths - Fixed Intervals</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+    }
+    .circle {
+      position: relative;
+      width: 600px;
+      height: 600px;
+      margin: 30px auto;
+      border-radius: 50%;
+      transition: transform 1s ease;
+    }
+    .key {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      line-height: 60px;
+      border-radius: 50%;
+      text-align: center;
+      font-weight: bold;
+      color: #fff;
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+    }
+    .interval {
+  z-index: 1;
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      font-size: 9px;
+      line-height: 12px;
+      text-align: center;
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(0.5);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      color: white;
+      padding-top: 6px;
+      box-sizing: border-box;
+    }
+    .key.show .interval {
+  z-index: 1; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    #scale {
+      font-size: 16px;
+      margin-top: 10px;
+    }
+  
+.interval:hover {
+  transform: translate(-50%, -50%) scale(1.5);
+  z-index: 10;
+}
+</style>
+</head>
+<body>
+  <h1>Circle of Fifths - Interval Bubbles Fixed</h1>
+  <p>Use arrow keys or click to rotate. Hover/tap a root to show intervals.</p>
+  <div class="circle" id="circle"></div>
+  <div id="scale"></div>
+  <script src="https://unpkg.com/tone/build/Tone.js">
+function updateLabelRotation() {
+  const keys = document.querySelectorAll('.key');
+  keys.forEach((key, i) => {
+    const label = key.querySelector('span');
+    const keyAngle = (i / 12) * 360 + angle;
+    if (label) label.style.transform = `rotate(${-keyAngle}deg)`;
+    const intervals = key.querySelectorAll('.interval span');
+    intervals.forEach((intLabel, j) => {
+      const intervalAngle = (j / 12) * 360 + angle;
+      intLabel.style.transform = `rotate(${-intervalAngle}deg)`;
+    });
+  });
+}
+
+function toggleIntervals() {
+  document.querySelectorAll('.key').forEach(key => {
+    if (showIntervals) {
+      key.classList.add("show");
+    } else {
+      key.classList.remove("show");
+    }
+  });
+}
+</script>
+
+  <script>
+let showIntervals = false;
+    const circle = document.getElementById("circle");
+    const scaleDisplay = document.getElementById("scale");
+    const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+
+    const intervalLabels = ["m2", "M2", "m3", "M3", "P4", "A4", "P5", "m6", "M6", "m7", "M7", "Oct"];
+    const semitones = [1,2,3,4,5,6,7,8,9,10,11,12];
+    const noteSequence = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+    const enharmonicMap = {
+      "E#": "F", "B#": "C", "Cb": "B", "Fb": "E",
+      "Db": "C#", "Eb": "D#", "Gb": "F#", "Ab": "G#", "Bb": "A#"
+    };
+    const allNotes = noteSequence.concat(noteSequence);
+
+    const noteColors = {
+      "C": "#ffc0cb", "C#": "#dda0dd", "D": "#800080", "D#": "#6a5acd",
+      "E": "#add8e6", "F": "#90ee90", "F#": "#9acd32", "G": "#ffff00",
+      "G#": "#ffae42", "A": "#ff0000", "A#": "#8b0000", "B": "#5c0000"
+    };
+
+    const keys = ["C","G","D","A","E","B","F#","Db","Ab","Eb","Bb","F"];
+    let activeIndex = 0;
+    let angle = 0;
+
+    function rotateTo(index) {
+      angle = index * -30;
+      circle.style.transform = `rotate(${angle}deg)`;
+      drawIntervals(keys[index]);
+      playChord(keys[index]);
+      scaleDisplay.innerHTML = `<strong>${keys[index]} Major Scale:</strong> ${getMajorScale(keys[index]).join(" - ")}`;
+    }
+
+    function normalize(note) {
+      return enharmonicMap[note] || note;
+    }
+
+    function getMajorScale(root) {
+      const steps = [2,2,1,2,2,2,1];
+      let i = noteSequence.indexOf(normalize(root));
+      const scale = [normalize(root)];
+      for (let step of steps) {
+        i = (i + step) % 12;
+        scale.push(noteSequence[i]);
+      }
+      return scale;
+    }
+
+    function transpose(root, semitone) {
+      const i = noteSequence.indexOf(normalize(root));
+      return i >= 0 ? normalize(allNotes[i + semitone]) : "?";
+    }
+
+    function drawCircle() {
+      circle.innerHTML = "";
+      const radius = 240;
+      const cx = 300, cy = 300;
+
+      keys.forEach((note, i) => {
+        const theta = (i / keys.length) * 2 * Math.PI;
+        const x = cx + radius * Math.cos(theta);
+        const y = cy + radius * Math.sin(theta);
+        const keyDiv = document.createElement("div");
+        keyDiv.className = "key";
+        keyDiv.style.left = x + "px";
+        keyDiv.style.top = y + "px";
+        keyDiv.style.background = noteColors[normalize(note)] || "#444";
+        const label = document.createElement("span"); label.textContent = note; keyDiv.appendChild(label);
+
+        semitones.forEach((s, j) => {
+          const intervalNote = transpose(note, s);
+          const angle = (j / 12) * 2 * Math.PI;
+          const ix = 30 + 60 * Math.cos(angle);
+          const iy = 30 + 60 * Math.sin(angle);
+          const bubble = document.createElement("div");
+          bubble.className = "interval";
+          bubble.style.left = ix + "px";
+          bubble.style.top = iy + "px";
+          bubble.style.background = noteColors[intervalNote] || "#999";
+          
+      const label = document.createElement("span");
+      label.innerHTML = `<strong>${intervalLabels[j]}</strong><br>${intervalNote}`;
+      bubble.appendChild(label);
+    
+          keyDiv.appendChild(bubble);
+        });
+
+        keyDiv.addEventListener("click", () => {
+          activeIndex = i;
+          rotateTo(i);
+        });
+
+        keyDiv.addEventListener("mouseenter", () => {
+          keyDiv.classList.add("show");
+        });
+
+        keyDiv.addEventListener("mouseleave", () => {
+          keyDiv.classList.remove("show");
+        });
+
+        circle.appendChild(keyDiv);
+      });
+    }
+
+    function drawIntervals(root) {
+      document.querySelectorAll(".key").forEach(div => div.classList.remove("active"));
+    }
+
+    function playChord(root) {
+      const chord = [0,4,7].map(semi => transpose(root, semi));
+      synth.triggerAttackRelease(chord, "1n");
+    }
+
+    document.addEventListener("keydown", e => {
+  if (e.key === "i") {
+    showIntervals = !showIntervals;
+    toggleIntervals();
+  }
+      if (e.key === "ArrowRight") {
+        activeIndex = (activeIndex + 1) % keys.length;
+        rotateTo(activeIndex);
+      }
+      if (e.key === "ArrowLeft") {
+        activeIndex = (activeIndex - 1 + keys.length) % keys.length;
+        rotateTo(activeIndex);
+      }
+    });
+
+    drawCircle(); updateLabelRotation(); toggleIntervals();
+    rotateTo(0);
+  
+function updateLabelRotation() {
+  const keys = document.querySelectorAll('.key');
+  keys.forEach((key, i) => {
+    const label = key.querySelector('span');
+    const keyAngle = (i / 12) * 360 + angle;
+    if (label) label.style.transform = `rotate(${-keyAngle}deg)`;
+    const intervals = key.querySelectorAll('.interval span');
+    intervals.forEach((intLabel, j) => {
+      const intervalAngle = (j / 12) * 360 + angle;
+      intLabel.style.transform = `rotate(${-intervalAngle}deg)`;
+    });
+  });
+}
+
+function toggleIntervals() {
+  document.querySelectorAll('.key').forEach(key => {
+    if (showIntervals) {
+      key.classList.add("show");
+    } else {
+      key.classList.remove("show");
+    }
+  });
+}
+</script>
+
+</body>
+</html>
