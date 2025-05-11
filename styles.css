@@ -1,0 +1,93 @@
+/* General styles */
+body {
+  background-color: white;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+
+canvas {
+  margin-top: 20px;
+  border: 1px solid var(--canvas-border-color);
+  background-color: var(--canvas-background-color);
+}
+
+/* Hotkeys menu */
+#hotkeys-menu {
+  background: lightgray;
+  padding: 10px;
+  border-radius: 10px;
+  display: inline-block;
+  margin: 10px 0; /* Reduce the top margin */
+  position: relative; /* Ensure it stays in the flow of the document */
+  top: -25px; /* Move it up slightly */
+  left: -340px; /* Move it to the left by 50px */
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.3s ease;
+}
+
+#hotkeys-menu.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Style for the canvas */
+#fretwheel-canvas {
+  display: block; /* Ensures the canvas is centered horizontally */
+  margin:  auto; /* Centers the canvas horizontally */
+  margin-top: -150px; /* Adjust this value to move the canvas closer to the top */
+  width: 800px; /* Display width */
+  height: 800px; /* Display height */
+  border: 1px solid var(--canvas-border-color, #ccc);
+  background-color: var(--canvas-background-color, #fff);
+}
+
+/* Style for the text inside the circles */
+.circle-text {
+  font-family: Arial, sans-serif;
+  font-size: 14px; /* Font size */
+  text-align: center;
+  fill: #000; /* Text color */
+}
+
+/* Style for the circles */
+.circle {
+  stroke: var(--circle-border-color, #000); /* Use CSS variable or fallback */
+  stroke-width: var(--circle-border-width, 1px); /* Circle border width */
+  fill: none; /* No fill color */
+}
+
+/* CSS variables */
+:root {
+  --circle-radius: 30px; /* Tonic node radius */
+  --circle-border-width: 2px;
+  --circle-border-color: #000;
+  --circle-text-font: 14px Arial;
+  --circle-text-color: #000;
+
+  --semitone-radius: 15px; /* Semitone node radius */
+  --semitone-border-color: #888;
+
+  --plus6-node-radius: 30px; /* +6 node radius */
+  --plus6-node-border-color: #000;
+  --plus6-node-text-color: #000;
+  --plus6-node-border-width: 2px;
+
+  --plus9-node-radius: 20px; /* +9 node radius */
+  --plus9-node-border-color: #888;
+  --plus9-node-text-color: #888;
+  --plus9-node-border-width: 1.5px;
+
+  --ring-outer-color: #ff0000;
+  --ring-middle-color: #00ff00;
+  --ring-inner-color: #0000ff;
+
+  --canvas-border-color: #ccc;
+  --canvas-background-color: #f9f9f9;
+}
